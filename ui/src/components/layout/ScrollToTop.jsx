@@ -1,9 +1,15 @@
-const ScrollToTop = () => {
-    return (
-        <div>
-            <h1>ScrollToTop</h1>
-        </div>
-    )
-}
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
-export default ScrollToTop;
+export default function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant'
+    });
+  }, [pathname]);
+
+  return null;
+} 
