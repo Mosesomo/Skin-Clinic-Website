@@ -82,7 +82,7 @@ const HeroSection = () => {
         className="absolute inset-0 pointer-events-none"
         style={{ y, opacity }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/70 to-black/50" />
         
         {/* Circular Opacity Overlays */}
         <div className="absolute top-20 left-32 w-96 h-96 bg-black/30 rounded-full blur-3xl"></div>
@@ -111,8 +111,10 @@ const HeroSection = () => {
           </motion.div>
         </AnimatePresence>
 
+        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/90" />
+
         {/* Content Overlay */}
-        <div className="absolute inset-0 flex items-center">
+        <div className="absolute inset-0 flex items-center mt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-4xl">
               <AnimatePresence mode="wait">
@@ -125,7 +127,7 @@ const HeroSection = () => {
                 >
                   {/* Medical Badge */}
                   <motion.div 
-                    className="inline-flex items-center space-x-2 bg-primary/20 text-white px-4 py-2 rounded-full text-sm font-medium mb-6 backdrop-blur-sm"
+                    className="inline-flex items-center space-x-2 bg-primary/20 text-white mt-10 px-4 py-2 rounded-full text-sm font-medium mb-6 backdrop-blur-sm"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
@@ -183,7 +185,7 @@ const HeroSection = () => {
                   </motion.div>
 
                   {/* Stats */}
-                  <motion.div 
+                  {/*<motion.div 
                     className="grid grid-cols-3 gap-8 max-w-lg"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -210,7 +212,7 @@ const HeroSection = () => {
                       <div className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">25+</div>
                       <div className="text-sm text-white/80">Years Experience</div>
                     </motion.div>
-                  </motion.div>
+                  </motion.div>*/}
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -254,7 +256,7 @@ const HeroSection = () => {
 
         {/* Scroll Indicator */}
         <motion.div
-          className="absolute bottom-8 right-8 hidden md:block"
+          className="absolute bottom-8 right-8 items-center hidden md:block"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{

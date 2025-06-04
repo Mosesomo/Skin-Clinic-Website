@@ -189,8 +189,8 @@ const Footer = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      123 Medical Center Drive<br />
-                      Nairobi, Kenya 00100
+                      Saba Saba -Kin'gorani Road<br />
+                      Ronald Ngala Rd, Mombasa
                     </p>
                   </div>
                 </div>
@@ -201,20 +201,7 @@ const Footer = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      +254 700 123 456<br />
-                      Emergency: +254 700 123 457
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3 group">
-                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
-                    <Mail className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      info@dermacare.com<br />
-                      appointments@dermacare.com
+                      0720 108898
                     </p>
                   </div>
                 </div>
@@ -223,11 +210,13 @@ const Footer = () => {
                   <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
                     <Clock className="w-4 h-4 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Mon - Fri: 8:00 AM - 6:00 PM<br />
-                      Sat: 9:00 AM - 4:00 PM
-                    </p>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Opening Hours:</p>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>Mon-Fri: 7 AM - 8 PM</li>
+                      <li>Saturday: Closed</li>
+                      <li>Sunday: 1 PM - 8 PM</li>
+                    </ul>
                   </div>
                 </div>
               </div>

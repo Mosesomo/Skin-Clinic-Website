@@ -1,286 +1,348 @@
-import { useState, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ArrowRight, ChevronLeft, ChevronRight, Clock, Users, BadgeCheck, Sparkles } from 'lucide-react';
-import ServiceCard from '@/components/ui/service-card';
+import { Link } from 'react-router-dom';
 import { services, serviceCategories } from '@/data/services';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { Filter, Search, Sparkles, X, ArrowRight, Calendar, Phone } from 'lucide-react';
 
-// Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
-
-const ServicesSection = () => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredServices, setFilteredServices] = useState(services);
-  
-  useEffect(() => {
-    const filtered = services.filter(service => {
-      const matchesCategory = selectedCategory === 'all' 
-        ? true 
-        : serviceCategories.find(cat => cat.id === selectedCategory)?.services.includes(service.id);
-      
-      const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          service.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return matchesCategory && matchesSearch;
-    });
-    
-    setFilteredServices(filtered);
-  }, [selectedCategory, searchQuery]);
-
-  const features = [
-    {
-      icon: <Clock className="w-6 h-6" />,
-      title: "Quick Appointments",
-      description: "Get seen by our specialists within 24-48 hours"
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      title: "Expert Team",
-      description: "Board-certified dermatologists with years of experience"
-    },
-    {
-      icon: <BadgeCheck className="w-6 h-6" />,
-      title: "Quality Care",
-      description: "State-of-the-art facilities and advanced treatments"
-    },
-    {
-      icon: <Sparkles className="w-6 h-6" />,
-      title: "Personalized Treatment",
-      description: "Customized care plans for your specific needs"
-    }
-  ];
-  
-  return (
-    <>
-      {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[480px] flex items-center justify-center overflow-hidden bg-gradient-to-r from-primary/5 to-accent/5">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1666214280557-f1b5022eb634?q=80&w=2070&auto=format&fit=crop"
-            alt="Dermatology Services"
-            className="w-full h-full object-cover opacity-50"
-            loading="eager"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/60" />
+// SearchInput Component
+const SearchInput = React.memo(({ value, onChange }) => (
+    <div className="relative">
+        <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+            <input
+                type="text"
+                placeholder="Search services..."
+                value={value}
+                onChange={onChange}
+                className="w-full pl-10 pr-4 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
         </div>
+    </div>
+));
 
-        {/* Content */}
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-2xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-4"
-            >
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                Professional Dermatology Services
-              </h1>
-              <p className="text-base md:text-lg text-muted-foreground max-w-xl">
-                Experience comprehensive skin care solutions tailored to your unique needs, delivered by our expert dermatologists.
-              </p>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <button 
-                  onClick={() => document.getElementById('services-section').scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-colors"
+// Filter Panel Component
+const FilterPanel = React.memo(({className, searchQuery, onSearchChange, selectedCategory, onCategoryChange}) => (
+    <div className={cn("space-y-6", className)}>
+        {/* Search */}
+        <SearchInput value={searchQuery} onChange={onSearchChange} />
+
+        {/* Categories */}
+        <div>
+            <h3 className="font-semibold mb-3">Categories</h3>
+            <div className="space-y-2">
+                <Button
+                    variant={selectedCategory === 'all' ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => onCategoryChange('all')}
                 >
-                  Explore Services
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-            </motion.div>
-          </div>
+                    All Services
+                </Button>
+                {serviceCategories.map(category => (
+                    <Button
+                        key={category.id}
+                        variant={selectedCategory === category.id ? "default" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => onCategoryChange(category.id)}
+                    >
+                        {category.title}
+                    </Button>
+                ))}
+            </div>
         </div>
+    </div>
+));
 
-        {/* Decorative Elements */}
-        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent" />
-      </section>
+// Service Card Component
+const ServiceCard = React.memo(({ service, variant = "default" }) => (
+    <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300">
+        <div className="aspect-video relative overflow-hidden">
+            <img 
+                src={service.image} 
+                alt={service.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            
+            {/* Category Badge */}
+            <div className="absolute top-4 left-4">
+                <Badge className="bg-primary/10 text-white backdrop-blur-sm">
+                    {service.category}
+                </Badge>
+            </div>
 
-      {/* Features Section */}
-      <section className="py-16 bg-card">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 bg-background rounded-xl border border-border hover:border-primary/20 transition-colors"
-              >
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-4">
-                  {feature.icon}
+            {/* Icon */}
+            <div className="absolute bottom-4 right-4">
+                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <service.Icon className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
+            </div>
         </div>
-      </section>
 
-      {/* Main Services Section */}
-      <section id="services-section" className="py-20 bg-background relative overflow-hidden">
-        {/* Background Decorations */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-3" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
-
-        <div className="container mx-auto px-4 relative">
-          <div className="text-center mb-16">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-2xl md:text-3xl font-bold text-foreground mb-4"
-            >
-              Our Services
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto"
-            >
-              Discover our range of specialized dermatological treatments
-            </motion.p>
-          </div>
-
-          {/* Search and Filter Section */}
-          <div className="mb-12 space-y-6">
-            {/* Search Bar */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="max-w-md mx-auto"
-            >
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search services..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-              </div>
-            </motion.div>
-
-            {/* Category Filter */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-wrap justify-center gap-3"
-            >
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCategory('all')}
-                className={`px-6 py-3 rounded-xl font-medium transition-all ${
-                  selectedCategory === 'all'
-                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                    : 'bg-card text-muted-foreground hover:text-foreground border border-border hover:bg-accent/10'
-                }`}
-              >
-                All Services
-              </motion.button>
-              {serviceCategories.map((category) => (
-                <motion.button
-                  key={category.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-6 py-3 rounded-xl font-medium capitalize transition-all ${
-                    selectedCategory === category.id
-                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                      : 'bg-card text-muted-foreground hover:text-foreground border border-border hover:bg-accent/10'
-                  }`}
-                >
-                  {category.title}
-                </motion.button>
-              ))}
-            </motion.div>
-          </div>
-          
-          {/* Services Grid/Slider */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <AnimatePresence mode="popLayout">
-              {filteredServices.length > 0 ? (
-                filteredServices.map((service, index) => (
-                  <ServiceCard key={service.id} service={service} index={index} />
-                ))
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="col-span-full text-center py-12"
-                >
-                  <p className="text-lg text-muted-foreground">
-                    No services found matching your criteria.
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Mobile Services Slider */}
-          <div className="md:hidden">
-            <Swiper
-              modules={[Pagination, Navigation, Autoplay]}
-              spaceBetween={20}
-              slidesPerView={1}
-              pagination={{ clickable: true }}
-              navigation={{
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev'
-              }}
-              autoplay={{
-                delay: 5000,
-                disableOnInteraction: false
-              }}
-              className="pb-12"
-            >
-              {filteredServices.map((service, index) => (
-                <SwiperSlide key={service.id}>
-                  <ServiceCard service={service} index={index} />
-                </SwiperSlide>
-              ))}
-              <div className="swiper-button-prev !text-primary !w-10 !h-10 !bg-background/80 !backdrop-blur-sm rounded-full shadow-lg"></div>
-              <div className="swiper-button-next !text-primary !w-10 !h-10 !bg-background/80 !backdrop-blur-sm rounded-full shadow-lg"></div>
-            </Swiper>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-20 bg-primary/5">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Skin?</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Book a consultation with our expert dermatologists and start your journey to healthier skin today.
+        <div className="p-6">
+            <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+                {service.title}
+            </h3>
+            <p className="text-muted-foreground mb-4">
+                {service.description}
             </p>
-            <button className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors inline-flex items-center gap-2">
-              Book Appointment
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+
+            <div className="space-y-4">
+                {/* Features */}
+                <div className="grid grid-cols-2 gap-2">
+                    {service.features.slice(0, 4).map((feature, index) => (
+                        <div key={index} className="flex items-center text-sm text-muted-foreground">
+                            <Sparkles className="w-4 h-4 mr-2 text-primary" />
+                            {feature}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Action Button */}
+                <Link to={`/services/${service.slug}`} className="block">
+                    <Button className="w-full group-hover:bg-primary">
+                        Learn More
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                </Link>
+            </div>
         </div>
-      </section>
-    </>
-  );
+    </Card>
+));
+
+const ServicesPage = () => {
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const servicesPerPage = 6;
+
+    const handleSearchChange = useCallback((e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1);
+    }, []);
+
+    const handleCategoryChange = useCallback((category) => {
+        setSelectedCategory(category);
+        setCurrentPage(1);
+    }, []);
+
+    // Filter and search services
+    const filteredServices = useMemo(() => {
+        return services.filter(service => {
+            const matchesCategory = selectedCategory === 'all' || 
+                serviceCategories.find(cat => cat.id === selectedCategory)?.services.includes(service.id);
+            const matchesSearch = searchQuery === '' ||
+                service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                service.description.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [selectedCategory, searchQuery]);
+
+    const totalPages = Math.ceil(filteredServices.length / servicesPerPage);
+
+    return (
+        <div className="min-h-screen bg-background">
+            {/* Hero Section */}
+            <section className="relative h-[70vh] min-h-[600px] w-screen mb-16 overflow-hidden">
+                <div className="absolute inset-0">
+                    <img 
+                        src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80"
+                        alt="Services Hero"
+                        className="w-full h-full object-cover"
+                        loading="eager"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
+                </div>
+
+                <div className="relative z-10 h-full flex items-center justify-center text-center text-white px-4">
+                    <div className="max-w-4xl">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            className="mb-6"
+                        >
+                            <Badge className="bg-primary/10 text-white backdrop-blur-sm">
+                                Our Services
+                            </Badge>
+                        </motion.div>
+
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6"
+                        >
+                            Expert Dermatological Care
+                        </motion.h1>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.4 }}
+                            className="text-xl md:text-2xl text-white/90 mb-8"
+                        >
+                            Comprehensive skin care solutions tailored to your unique needs
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.6 }}
+                            className="flex flex-wrap gap-4 justify-center"
+                        >
+                            <Button size="lg" className="bg-primary hover:bg-primary/90">
+                                <Calendar className="mr-2 h-5 w-5" />
+                                Book Appointment
+                            </Button>
+                            <Button size="lg" variant="outline" className="bg-white/10 text-white hover:bg-white/20">
+                                <Phone className="mr-2 h-5 w-5" />
+                                Contact Us
+                            </Button>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden fixed bottom-6 left-6 z-50">
+                <Button
+                    size="lg"
+                    className="rounded-full bg-primary border-2 border-accent shadow-lg h-14 w-14 p-0"
+                    onClick={() => setIsFilterOpen(true)}
+                >
+                    <Filter className="h-6 w-6" />
+                </Button>
+            </div>
+
+            {/* Mobile Filter Panel */}
+            <AnimatePresence>
+                {isFilterOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, x: '-100%' }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: '-100%' }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed inset-y-0 left-0 w-full max-w-sm bg-background border-r shadow-xl z-50 lg:hidden"
+                    >
+                        <div className="h-full flex flex-col">
+                            <div className="p-4 border-b flex items-center justify-between">
+                                <h2 className="text-lg font-semibold">Filters</h2>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsFilterOpen(false)}
+                                >
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4">
+                                <FilterPanel
+                                    searchQuery={searchQuery}
+                                    onSearchChange={handleSearchChange}
+                                    selectedCategory={selectedCategory}
+                                    onCategoryChange={handleCategoryChange}
+                                />
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Main Content */}
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
+                    {/* Desktop Sidebar */}
+                    <aside className="hidden lg:block">
+                        <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-4">
+                            <FilterPanel
+                                searchQuery={searchQuery}
+                                onSearchChange={handleSearchChange}
+                                selectedCategory={selectedCategory}
+                                onCategoryChange={handleCategoryChange}
+                            />
+                        </div>
+                    </aside>
+
+                    {/* Services Grid */}
+                    <div className="space-y-8">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-semibold">
+                                {selectedCategory === 'all' 
+                                    ? 'All Services' 
+                                    : serviceCategories.find(c => c.id === selectedCategory)?.title}
+                            </h2>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="lg:hidden"
+                                onClick={() => setIsFilterOpen(true)}
+                            >
+                                <Filter className="h-4 w-4 mr-2" />
+                                Filters
+                            </Button>
+                        </div>
+
+                        {filteredServices.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {filteredServices
+                                    .slice((currentPage - 1) * servicesPerPage, currentPage * servicesPerPage)
+                                    .map((service, index) => (
+                                        <motion.div
+                                            key={service.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                                        >
+                                            <ServiceCard service={service} />
+                                        </motion.div>
+                                    ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12">
+                                <p className="text-lg text-muted-foreground">
+                                    No services found matching your criteria. Try adjusting your filters.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center gap-2 mt-8">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </Button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <Button
+                                        key={page}
+                                        variant={currentPage === page ? "default" : "outline"}
+                                        onClick={() => setCurrentPage(page)}
+                                    >
+                                        {page}
+                                    </Button>
+                                ))}
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };
 
-export default ServicesSection;
+export default ServicesPage; 

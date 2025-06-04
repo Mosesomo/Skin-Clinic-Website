@@ -1,182 +1,206 @@
-import { useState } from 'react';
-import { ShoppingCart, Star, Filter, X, Search, Heart, Eye, Package, Sparkles, Award, Shield } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, Star, Filter, X, Search, Heart, Eye, Package, Phone, Mail, Sparkles, Award, Shield, ChevronLeft, ChevronRight, Pill, Syringe, Bandage, TestTube2, Bone, Activity } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { ArrowRight } from 'lucide-react';
 
 const ShopPage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [cartItems, setCartItems] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [priceRange, setPriceRange] = useState([0, 200]);
     const [sortBy, setSortBy] = useState('name');
     const [wishlist, setWishlist] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 6;
     
     const categories = [
-        { id: 'all', name: 'All Products', count: 12 },
-        { id: 'cleansers', name: 'Cleansers', count: 3 },
-        { id: 'moisturizers', name: 'Moisturizers', count: 2 },
-        { id: 'serums', name: 'Serums', count: 3 },
-        { id: 'treatments', name: 'Treatments', count: 2 },
-        { id: 'sunscreen', name: 'Sunscreen', count: 2 }
+        { id: 'all', name: 'All Medicines', count: 12 },
+        { id: 'antibiotics', name: 'Antibiotics', count: 3 },
+        { id: 'antifungals', name: 'Antifungals', count: 2 },
+        { id: 'retinoids', name: 'Retinoids', count: 3 },
+        { id: 'steroids', name: 'Steroids', count: 2 },
+        { id: 'immunosuppressants', name: 'Immunosuppressants', count: 2 }
     ];
     
     const products = [
         {
             id: 1,
-            name: "Gentle Cleansing Foam",
-            category: "cleansers",
-            price: 45,
-            originalPrice: 55,
-            image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop",
+            name: "Clindamycin Gel",
+            category: "antibiotics",
+            price: 25,
+            originalPrice: 35,
+            image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop",
             rating: 4.8,
             reviews: 124,
-            description: "Deep cleansing foam for sensitive skin with ceramides",
+            description: "Topical antibiotic for acne treatment, prevents bacterial growth",
             badge: "Best Seller",
-            ingredients: ["Ceramides", "Niacinamide", "Hyaluronic Acid"]
+            ingredients: ["Clindamycin phosphate", "Alcohol", "Water"],
+            prescription: true
         },
         {
             id: 2,
-            name: "Hydrating Moisturizer",
-            category: "moisturizers",
-            price: 65,
-            image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop",
-            rating: 4.9,
+            name: "Hydrocortisone Cream",
+            category: "steroids",
+            price: 18,
+            image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop",
+            rating: 4.7,
             reviews: 89,
-            description: "24-hour hydration for all skin types",
+            description: "Low-potency steroid cream for eczema and dermatitis relief",
             badge: "Derma Recommended",
-            ingredients: ["Hyaluronic Acid", "Glycerin", "Peptides"]
+            ingredients: ["Hydrocortisone acetate", "Petrolatum", "Mineral oil"],
+            prescription: false
         },
         {
             id: 3,
-            name: "Vitamin C Serum",
-            category: "serums",
-            price: 85,
-            image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop",
-            rating: 4.7,
+            name: "Tretinoin Cream",
+            category: "retinoids",
+            price: 45,
+            image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop",
+            rating: 4.6,
             reviews: 156,
-            description: "Brightening serum with 20% pure vitamin C",
-            badge: "New",
-            ingredients: ["Vitamin C", "Vitamin E", "Ferulic Acid"]
+            description: "Topical retinoid for acne and anti-aging treatment",
+            badge: "Prescription",
+            ingredients: ["Tretinoin", "Emollients", "Preservatives"],
+            prescription: true
         },
         {
             id: 4,
-            name: "Acne Treatment Gel",
-            category: "treatments",
-            price: 55,
-            image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400&h=400&fit=crop",
-            rating: 4.6,
+            name: "Ketoconazole Shampoo",
+            category: "antifungals",
+            price: 22,
+            image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop",
+            rating: 4.5,
             reviews: 98,
-            description: "Targeted treatment for acne-prone skin",
-            ingredients: ["Salicylic Acid", "Benzoyl Peroxide", "Tea Tree Oil"]
+            description: "Antifungal treatment for dandruff and seborrheic dermatitis",
+            ingredients: ["Ketoconazole", "Sodium lauryl sulfate", "Fragrance"],
+            prescription: false
         },
         {
             id: 5,
-            name: "Anti-Aging Cream",
-            category: "treatments",
-            price: 120,
-            originalPrice: 150,
-            image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
+            name: "Tacrolimus Ointment",
+            category: "immunosuppressants",
+            price: 85,
+            originalPrice: 95,
+            image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop",
             rating: 4.9,
             reviews: 203,
-            description: "Advanced anti-aging formula with retinol",
+            description: "Immunomodulator for atopic dermatitis treatment",
             badge: "Premium",
-            ingredients: ["Retinol", "Peptides", "Collagen"]
+            ingredients: ["Tacrolimus", "Mineral oil", "Paraffin"],
+            prescription: true
         },
         {
             id: 6,
-            name: "Retinol Night Serum",
-            category: "serums",
-            price: 95,
-            image: "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=400&h=400&fit=crop",
-            rating: 4.8,
+            name: "Adapalene Gel",
+            category: "retinoids",
+            price: 38,
+            image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop",
+            rating: 4.7,
             reviews: 67,
-            description: "Night serum with 0.5% retinol for skin renewal",
-            ingredients: ["Retinol", "Squalane", "Vitamin E"]
+            description: "Third-generation retinoid for acne treatment",
+            ingredients: ["Adapalene", "Carbomer", "Edetate disodium"],
+            prescription: false
         },
         {
             id: 7,
-            name: "Micellar Cleansing Water",
-            category: "cleansers",
+            name: "Mupirocin Ointment",
+            category: "antibiotics",
             price: 32,
-            image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop",
-            rating: 4.5,
+            image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop",
+            rating: 4.6,
             reviews: 145,
-            description: "Gentle makeup remover for all skin types",
-            badge: "Gentle Formula",
-            ingredients: ["Micelles", "Rose Water", "Cucumber Extract"]
+            description: "Topical antibiotic for impetigo and skin infections",
+            badge: "Essential",
+            ingredients: ["Mupirocin calcium", "Polyethylene glycol"],
+            prescription: true
         },
         {
             id: 8,
-            name: "Niacinamide Serum",
-            category: "serums",
-            price: 42,
-            image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop",
-            rating: 4.7,
+            name: "Fluconazole Tablets",
+            category: "antifungals",
+            price: 55,
+            image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop",
+            rating: 4.8,
             reviews: 189,
-            description: "10% Niacinamide for pore refinement",
-            badge: "Trending",
-            ingredients: ["Niacinamide", "Zinc", "Hyaluronic Acid"]
+            description: "Oral antifungal for systemic fungal infections",
+            badge: "Prescription",
+            ingredients: ["Fluconazole", "Lactose", "Magnesium stearate"],
+            prescription: true
         },
         {
             id: 9,
-            name: "SPF 50+ Sunscreen",
-            category: "sunscreen",
-            price: 38,
-            image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
-            rating: 4.6,
+            name: "Clobetasol Cream",
+            category: "steroids",
+            price: 42,
+            image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop",
+            rating: 4.5,
             reviews: 234,
-            description: "Broad spectrum protection with zinc oxide",
-            badge: "Essential",
-            ingredients: ["Zinc Oxide", "Titanium Dioxide", "Vitamin E"]
+            description: "High-potency steroid for severe inflammatory skin conditions",
+            ingredients: ["Clobetasol propionate", "Propylene glycol", "Cetyl alcohol"],
+            prescription: true
         },
         {
             id: 10,
-            name: "Tinted Moisturizer SPF 30",
-            category: "sunscreen",
-            price: 52,
-            image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
+            name: "Pimecrolimus Cream",
+            category: "immunosuppressants",
+            price: 78,
+            image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop",
             rating: 4.4,
             reviews: 76,
-            description: "Light coverage with sun protection",
-            ingredients: ["SPF 30", "Iron Oxides", "Hyaluronic Acid"]
+            description: "Non-steroidal treatment for atopic dermatitis",
+            ingredients: ["Pimecrolimus", "Benzyl alcohol", "Stearyl alcohol"],
+            prescription: true
         },
         {
             id: 11,
-            name: "Rich Night Moisturizer",
-            category: "moisturizers",
-            price: 78,
-            image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop",
-            rating: 4.8,
+            name: "Benzoyl Peroxide Wash",
+            category: "antibiotics",
+            price: 15,
+            image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop",
+            rating: 4.3,
             reviews: 92,
-            description: "Intensive overnight hydration cream",
-            badge: "Night Care",
-            ingredients: ["Ceramides", "Shea Butter", "Peptides"]
+            description: "Antibacterial cleanser for acne-prone skin",
+            badge: "Over-the-counter",
+            ingredients: ["Benzoyl peroxide", "Surfactants", "Water"],
+            prescription: false
         },
         {
             id: 12,
-            name: "Exfoliating Cleanser",
-            category: "cleansers",
-            price: 48,
-            image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop",
+            name: "Salicylic Acid Solution",
+            category: "retinoids",
+            price: 18,
+            image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop",
             rating: 4.5,
             reviews: 118,
-            description: "Gentle exfoliation with glycolic acid",
-            ingredients: ["Glycolic Acid", "Jojoba Beads", "Aloe Vera"]
+            description: "Keratolytic agent for acne and wart treatment",
+            ingredients: ["Salicylic acid", "Alcohol", "Water"],
+            prescription: false
         }
     ];
 
-    const filteredProducts = products.filter(product => {
-        const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-        return matchesCategory && matchesSearch && matchesPrice;
-    }).sort((a, b) => {
-        switch (sortBy) {
-            case 'price-low': return a.price - b.price;
-            case 'price-high': return b.price - a.price;
-            case 'rating': return b.rating - a.rating;
-            default: return a.name.localeCompare(b.name);
-        }
-    });
+    // Filter products
+    const filteredProducts = useMemo(() => {
+        return products.filter(product => {
+            const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+            const matchesSearch = searchQuery === '' ||
+                product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                product.description.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [selectedCategory, searchQuery]);
+
+    // Pagination logic
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
     const addToCart = (product) => {
         const existingItem = cartItems.find(item => item.id === product.id);
@@ -202,283 +226,608 @@ const ShopPage = () => {
     const getBadgeStyle = (badge) => {
         const styles = {
             'Best Seller': 'bg-gradient-to-r from-yellow-400 to-orange-500',
-            'New': 'bg-gradient-to-r from-green-400 to-emerald-500',
-            'Premium': 'bg-gradient-to-r from-purple-400 to-pink-500',
-            'Trending': 'bg-gradient-to-r from-blue-400 to-cyan-500',
-            'Essential': 'bg-gradient-to-r from-red-400 to-pink-500',
-            'Derma Recommended': 'bg-gradient-to-r from-indigo-400 to-purple-500',
-            'Gentle Formula': 'bg-gradient-to-r from-teal-400 to-green-500',
-            'Night Care': 'bg-gradient-to-r from-slate-400 to-gray-500'
+            'Derma Recommended': 'bg-gradient-to-r from-blue-500 to-blue-700',
+            'Prescription': 'bg-gradient-to-r from-red-500 to-pink-600',
+            'Premium': 'bg-gradient-to-r from-purple-500 to-pink-500',
+            'Essential': 'bg-gradient-to-r from-green-500 to-teal-500',
+            'Over-the-counter': 'bg-gradient-to-r from-gray-500 to-gray-700'
         };
         return styles[badge] || 'bg-gradient-to-r from-gray-400 to-gray-500';
     };
 
+    const getCategoryIcon = (category) => {
+        const icons = {
+            'antibiotics': <Pill className="w-5 h-5" />,
+            'antifungals': <TestTube2 className="w-5 h-5" />,
+            'retinoids': <Activity className="w-5 h-5" />,
+            'steroids': <Syringe className="w-5 h-5" />,
+            'immunosuppressants': <Shield className="w-5 h-5" />,
+            'all': <Package className="w-5 h-5" />
+        };
+        return icons[category] || <Package className="w-5 h-5" />;
+    };
+
+    // Animation variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+                duration: 0.8
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.6,
+                ease: "easeOut"
+            }
+        }
+    };
+
+    const fadeInUp = {
+        hidden: { opacity: 0, y: 40 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.8, ease: "easeOut" }
+        }
+    };
+
+    const scaleIn = {
+        hidden: { opacity: 0, scale: 0.8 },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            transition: { duration: 0.6, ease: "easeOut" }
+        }
+    };
+
     return (
-        <section className="relative py-20 bg-gradient-to-br from-background via-muted/20 to-card overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute inset-0">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.1),transparent_50%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(168,85,247,0.1),transparent_50%)]" />
-            </div>
-
-            <div className="container mx-auto px-4 relative z-10">
-                {/* Header */}
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full mb-4">
-                        <Package className="w-6 h-6 text-primary" />
-                    </div>
-                    <h2 className="text-4xl font-bold text-foreground mb-4">
-                        Skincare
-                        <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent ml-2">
-                            Shop
-                        </span>
-                    </h2>
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                        Premium dermatologist-recommended skincare products for every skin concern
-                    </p>
+        <div className="bg-white min-h-screen">
+            {/* Hero Section */}
+            <section className="relative py-16 sm:py-20  overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop')] opacity-100 mix-blend-multiply">
                 </div>
-
-                {/* Search and Filter Bar */}
-                <div className="flex flex-col lg:flex-row gap-4 mb-8">
-                    <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                        <input
-                            type="text"
-                            placeholder="Search products..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
-                        />
-                    </div>
-                    <div className="flex gap-3">
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="px-4 py-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        >
-                            <option value="name">Sort by Name</option>
-                            <option value="price-low">Price: Low to High</option>
-                            <option value="price-high">Price: High to Low</option>
-                            <option value="rating">Highest Rated</option>
-                        </select>
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="lg:hidden px-4 py-3 bg-primary text-primary-foreground rounded-xl flex items-center space-x-2"
-                        >
-                            <Filter className="w-4 h-4" />
-                            <span>Filters</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div className="flex gap-8">
-                    {/* Sidebar Filters */}
-                    <div className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-80 space-y-6`}>
-                        <div className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-foreground">Categories</h3>
-                                <button 
-                                    onClick={() => setShowFilters(false)}
-                                    className="lg:hidden text-muted-foreground hover:text-foreground"
+                <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/90" />
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="flex flex-col md:flex-row items-center">
+                        <div className="md:w-1/2 mb-8 md:mb-0">
+                            <motion.div
+                                initial="hidden"
+                                animate="visible"
+                                variants={containerVariants}
+                            >
+                                <motion.div variants={itemVariants}>
+                                    <Badge variant="outline" className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200">
+                                        Dermatology Pharmacy
+                                    </Badge>
+                                </motion.div>
+                                
+                                <motion.h1 
+                                    variants={itemVariants}
+                                    className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6"
                                 >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <div className="space-y-3">
-                                {categories.map((category) => (
-                                    <button
-                                        key={category.id}
-                                        onClick={() => setSelectedCategory(category.id)}
-                                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
-                                            selectedCategory === category.id
-                                                ? 'bg-gradient-to-r from-primary/20 to-secondary/20 text-primary border border-primary/30'
-                                                : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
-                                        }`}
-                                    >
-                                        <span className="font-medium">{category.name}</span>
-                                        <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                                            {category.count}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                                    Premium <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">Skin Medicines</span>
+                                </motion.h1>
+                                
+                                <motion.div 
+                                    variants={itemVariants}
+                                    className="w-20 h-1 bg-gradient-to-r from-blue-600 to-blue-400 mb-6" 
+                                />
+                                
+                                <motion.p 
+                                    variants={itemVariants}
+                                    className="text-lg sm:text-xl text-white leading-relaxed mb-8"
+                                >
+                                    Clinically proven dermatological medications for all skin conditions, from acne to eczema and beyond.
+                                </motion.p>
 
-                        {/* Price Range */}
-                        <div className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
-                            <h3 className="text-lg font-semibold text-foreground mb-4">Price Range</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                    <span>${priceRange[0]}</span>
-                                    <span>${priceRange[1]}</span>
-                                </div>
-                                <div className="bg-muted/30 h-2 rounded-full relative">
-                                    <div 
-                                        className="bg-gradient-to-r from-primary to-secondary h-full rounded-full"
-                                        style={{ width: `${(priceRange[1] / 200) * 100}%` }}
+                                <motion.div
+                                    variants={itemVariants}
+                                    className="flex flex-col sm:flex-row gap-4"
+                                >
+                                    <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                                        <Phone className="w-4 h-4 mr-2" />
+                                        Consult a Dermatologist
+                                    </Button>
+                                    <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-6 sm:px-8 py-3 rounded-xl font-semibold transition-all duration-300">
+                                        Learn About Treatments
+                                    </Button>
+                                </motion.div>
+                            </motion.div>
+                        </div>
+                        <div className="md:w-1/2 flex justify-center mt-10">
+                            <motion.div
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                                className="relative"
+                            >
+                                <div className="relative">
+                                    <motion.img
+                                        whileHover={{ scale: 1.02 }}
+                                        transition={{ duration: 0.3 }}
+                                        src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=600"
+                                        alt="Skin medicines"
+                                        className="rounded-xl shadow-2xl w-full h-auto max-h-[400px] object-cover"
                                     />
-                                </div>
-                            </div>
-                        </div>
+                                    
+                                    {/* Floating elements */}
+                                    <motion.div
+                                        animate={{ y: [0, -10, 0] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                        className="absolute -top-4 -right-4 bg-white p-4 rounded-xl shadow-lg border border-gray-100"
+                                    >
+                                        <Pill className="w-8 h-8 text-blue-600" />
+                                    </motion.div>
 
-                        {/* Featured Badge */}
-                        <div className="bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 rounded-2xl p-6">
-                            <div className="flex items-center space-x-3 mb-3">
-                                <Award className="w-6 h-6 text-primary" />
-                                <h3 className="text-lg font-semibold text-foreground">Expert Choice</h3>
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                All products are dermatologist-tested and recommended by our clinical team.
-                            </p>
-                            <div className="flex items-center space-x-2 text-xs text-primary">
-                                <Shield className="w-4 h-4" />
-                                <span>Clinically Proven</span>
-                            </div>
+                                    <motion.div
+                                        animate={{ y: [0, 10, 0] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                        className="absolute -bottom-4 -left-4 bg-white p-4 rounded-xl shadow-lg border border-gray-100"
+                                    >
+                                        <Bandage className="w-8 h-8 text-blue-600" />
+                                    </motion.div>
+                                </div>
+                            </motion.div>
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    {/* Products Grid */}
-                    <div className="flex-1">
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredProducts.map((product, index) => (
-                                <div
-                                    key={product.id}
-                                    className="group relative bg-card/60 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]"
-                                    style={{ animationDelay: `${index * 100}ms` }}
-                                >
-                                    {/* Product Badge */}
-                                    {product.badge && (
-                                        <div className={`absolute top-4 left-4 z-10 px-3 py-1 ${getBadgeStyle(product.badge)} text-white text-xs font-semibold rounded-full`}>
-                                            {product.badge}
-                                        </div>
-                                    )}
+            {/* Shop Section */}
+            <section className="py-12 bg-white">
+                <div className="container mx-auto px-4">
+                    {/* Header */}
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={containerVariants}
+                        className="text-center mb-12"
+                    >
+                        <motion.div variants={itemVariants}>
+                            <Badge variant="outline" className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200">
+                                Our Pharmacy
+                            </Badge>
+                        </motion.div>
+                        <motion.h2 
+                            variants={itemVariants}
+                            className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
+                        >
+                            Dermatological <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">Medications</span>
+                        </motion.h2>
+                        <motion.div 
+                            variants={itemVariants}
+                            className="mx-auto w-20 h-1 bg-gradient-to-r from-blue-600 to-blue-400 mb-6" 
+                        />
+                        <motion.p 
+                            variants={itemVariants}
+                            className="text-lg text-gray-600 max-w-3xl mx-auto"
+                        >
+                            Prescription and over-the-counter medications for all skin conditions
+                        </motion.p>
+                    </motion.div>
 
-                                    {/* Wishlist Button */}
-                                    <button
-                                        onClick={() => toggleWishlist(product.id)}
-                                        className="absolute top-4 right-4 z-10 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all group-hover:scale-110"
-                                    >
-                                        <Heart className={`w-4 h-4 ${wishlist.includes(product.id) ? 'text-red-500 fill-current' : 'text-muted-foreground'}`} />
-                                    </button>
-
-                                    {/* Product Image */}
-                                    <div className="relative overflow-hidden">
-                                        <img
-                                            src={product.image}
-                                            alt={product.name}
-                                            className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                        
-                                        {/* Quick View Button */}
-                                        <button className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform scale-75 group-hover:scale-100 transition-transform">
-                                                <Eye className="w-5 h-5 text-primary" />
-                                            </div>
-                                        </button>
-                                    </div>
-
-                                    {/* Product Info */}
-                                    <div className="p-6">
-                                        <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                                            {product.name}
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-                                            {product.description}
-                                        </p>
-
-                                        {/* Rating */}
-                                        <div className="flex items-center space-x-2 mb-3">
-                                            <div className="flex items-center space-x-1">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star 
-                                                        key={i} 
-                                                        className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-muted-foreground/30'}`} 
-                                                    />
-                                                ))}
-                                            </div>
-                                            <span className="text-sm text-muted-foreground">
-                                                {product.rating} ({product.reviews})
-                                            </span>
-                                        </div>
-
-                                        {/* Key Ingredients */}
-                                        <div className="mb-4">
-                                            <p className="text-xs text-muted-foreground mb-2">Key Ingredients:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {product.ingredients.slice(0, 3).map((ingredient, i) => (
-                                                    <span key={i} className="text-xs bg-muted/50 text-muted-foreground px-2 py-1 rounded-full">
-                                                        {ingredient}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Price */}
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center space-x-2">
-                                                <span className="text-2xl font-bold text-primary">${product.price}</span>
-                                                {product.originalPrice && (
-                                                    <span className="text-sm text-muted-foreground line-through">${product.originalPrice}</span>
-                                                )}
-                                            </div>
-                                            {product.originalPrice && (
-                                                <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                                                    Save ${product.originalPrice - product.price}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {/* Add to Cart Button */}
-                                        <button 
-                                            onClick={() => addToCart(product)}
-                                            className="w-full bg-gradient-to-r from-primary to-secondary text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 group-hover:scale-105"
-                                        >
-                                            <ShoppingCart className="w-4 h-4" />
-                                            <span>Add to Cart</span>
-                                        </button>
-                                    </div>
-
-                                    {/* Hover Effect Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl" />
-                                </div>
-                            ))}
+                    {/* Search and Filter Bar */}
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                        className="flex flex-col md:flex-row gap-4 mb-8 items-center"
+                    >
+                        <div className="flex-1 relative w-full">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <Input
+                                type="text"
+                                placeholder="Search medicines..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
                         </div>
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="name">Sort by Name</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="rating">Highest Rated</option>
+                            </select>
+                            <Button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="md:hidden px-4 py-3 bg-blue-600 text-white rounded-lg flex items-center space-x-2"
+                            >
+                                <Filter className="w-5 h-5" />
+                                <span>Filters</span>
+                            </Button>
+                        </div>
+                    </motion.div>
 
-                        {filteredProducts.length === 0 && (
-                            <div className="text-center py-12">
-                                <Package className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold text-foreground mb-2">No products found</h3>
-                                <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Sidebar Filters - Mobile */}
+                        {showFilters && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setShowFilters(false)}>
+                                <div className="absolute right-0 top-0 h-full w-4/5 bg-white shadow-xl p-6 overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-xl font-bold text-gray-900">Filters</h3>
+                                        <Button onClick={() => setShowFilters(false)} className="text-gray-500 hover:text-gray-700" variant="ghost">
+                                            <X className="w-6 h-6" />
+                                        </Button>
+                                    </div>
+                                    
+                                    <div className="space-y-6">
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-semibold text-gray-900 mb-3">Categories</h4>
+                                            <div className="space-y-2">
+                                                {categories.map((category) => (
+                                                    <Button
+                                                        key={category.id}
+                                                        onClick={() => setSelectedCategory(category.id)}
+                                                        variant={selectedCategory === category.id ? "default" : "ghost"}
+                                                        className={`w-full flex items-center justify-between p-2 rounded-md transition-all ${
+                                                            selectedCategory === category.id
+                                                                ? 'bg-blue-600 text-white'
+                                                                : 'hover:bg-gray-100 text-gray-700'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center space-x-2">
+                                                            {getCategoryIcon(category.id)}
+                                                            <span>{category.name}</span>
+                                                        </div>
+                                                        <Badge variant="secondary" className="ml-2">
+                                                            {category.count}
+                                                        </Badge>
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-semibold text-gray-900 mb-3">Price Range</h4>
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between text-sm text-gray-600">
+                                                    <span>${priceRange[0]}</span>
+                                                    <span>${priceRange[1]}</span>
+                                                </div>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="200"
+                                                    value={priceRange[1]}
+                                                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <Button 
+                                            onClick={() => setShowFilters(false)}
+                                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                                        >
+                                            Apply Filters
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         )}
-                    </div>
-                </div>
-            </div>
 
-            {/* Floating Cart */}
-            {cartItems.length > 0 && (
-                <div className="fixed bottom-6 right-6 z-50">
-                    <div className="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-2xl shadow-2xl backdrop-blur-sm">
-                        <div className="flex items-center space-x-3">
-                            <div className="relative">
-                                <ShoppingCart className="w-6 h-6" />
-                                <span className="absolute -top-2 -right-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                                    {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-                                </span>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Cart Total</p>
-                                <p className="text-sm opacity-90">
-                                    ${cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                        {/* Sidebar Filters - Desktop */}
+                        <div className="hidden lg:block w-72 space-y-6">
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={scaleIn}
+                                className="bg-gray-50 border border-gray-200 rounded-xl p-6"
+                            >
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
+                                <div className="space-y-3">
+                                    {categories.map((category) => (
+                                        <Button
+                                            key={category.id}
+                                            onClick={() => setSelectedCategory(category.id)}
+                                            variant={selectedCategory === category.id ? "default" : "ghost"}
+                                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                                                selectedCategory === category.id
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'hover:bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center space-x-2">
+                                                {getCategoryIcon(category.id)}
+                                                <span className="font-medium">{category.name}</span>
+                                            </div>
+                                            <Badge variant="secondary" className="ml-2">
+                                                {category.count}
+                                            </Badge>
+                                        </Button>
+                                    ))}
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={scaleIn}
+                                className="bg-gray-50 border border-gray-200 rounded-xl p-6"
+                            >
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Range</h3>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between text-sm text-gray-600">
+                                        <span>${priceRange[0]}</span>
+                                        <span>${priceRange[1]}</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="200"
+                                        value={priceRange[1]}
+                                        onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                    />
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={scaleIn}
+                                className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6"
+                            >
+                                <div className="flex items-center space-x-3 mb-3">
+                                    <Shield className="w-6 h-6 text-blue-600" />
+                                    <h3 className="text-lg font-semibold text-gray-900">Prescription Info</h3>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Some medications require a prescription. Please consult with our dermatologists before purchasing.
                                 </p>
-                            </div>
-                            <Sparkles className="w-5 h-5 animate-pulse" />
+                                <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white w-full">
+                                    <Phone className="w-4 h-4 mr-2" />
+                                    Contact Doctor
+                                </Button>
+                            </motion.div>
+                        </div>
+
+                        {/* Products Grid */}
+                        <div className="flex-1">
+                            {filteredProducts.length > 0 ? (
+                                <>
+                                    <motion.div
+                                        initial="hidden"
+                                        whileInView="visible"
+                                        viewport={{ once: true }}
+                                        variants={containerVariants}
+                                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+                                    >
+                                        {currentProducts.map((product) => (
+                                            <motion.div
+                                                key={product.id}
+                                                variants={itemVariants}
+                                                whileHover={{ 
+                                                    scale: 1.03,
+                                                    transition: { duration: 0.3 }
+                                                }}
+                                                className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
+                                            >
+                                                {/* Product Badge */}
+                                                {product.badge && (
+                                                    <div className={`absolute top-4 left-4 z-10 px-3 py-1 ${getBadgeStyle(product.badge)} text-white text-xs font-semibold rounded-full`}>
+                                                        {product.badge}
+                                                    </div>
+                                                )}
+
+                                                {/* Prescription Badge */}
+                                                {product.prescription && (
+                                                    <div className="absolute top-4 right-4 z-10 px-3 py-1 bg-gradient-to-r from-red-500 to-pink-600 text-white text-xs font-semibold rounded-full">
+                                                        Prescription
+                                                    </div>
+                                                )}
+
+                                                {/* Wishlist Button */}
+                                                <button
+                                                    onClick={() => toggleWishlist(product.id)}
+                                                    className="absolute top-16 right-4 z-10 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-all"
+                                                >
+                                                    <Heart className={`w-5 h-5 ${wishlist.includes(product.id) ? 'text-red-500 fill-current' : 'text-gray-400'}`} />
+                                                </button>
+
+                                                {/* Product Image */}
+                                                <div className="relative overflow-hidden aspect-square bg-gray-50">
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 p-4"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                                    
+                                                    {/* Quick View Button */}
+                                                    <button className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                        <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform scale-75 group-hover:scale-100 transition-transform shadow-md">
+                                                            <Eye className="w-5 h-5 text-blue-600" />
+                                                        </div>
+                                                    </button>
+                                                </div>
+
+                                                {/* Product Info */}
+                                                <div className="p-5">
+                                                    <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                                        {product.name}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                                                        {product.description}
+                                                    </p>
+
+                                                    {/* Rating */}
+                                                    <div className="flex items-center space-x-2 mb-3">
+                                                        <div className="flex items-center space-x-1">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <Star 
+                                                                    key={i} 
+                                                                    className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        <span className="text-sm text-gray-500">
+                                                            {product.rating} ({product.reviews})
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Key Ingredients */}
+                                                    <div className="mb-4">
+                                                        <p className="text-xs text-gray-500 mb-2">Active Ingredients:</p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {product.ingredients.slice(0, 3).map((ingredient, i) => (
+                                                                <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                                                    {ingredient}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Price */}
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center space-x-2">
+                                                            <span className="text-xl font-bold text-blue-600">${product.price}</span>
+                                                            {product.originalPrice && (
+                                                                <span className="text-sm text-gray-400 line-through">${product.originalPrice}</span>
+                                                            )}
+                                                        </div>
+                                                        {product.originalPrice && (
+                                                            <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                                                                Save ${product.originalPrice - product.price}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Add to Cart Button */}
+                                                    <Button 
+                                                        onClick={() => addToCart(product)}
+                                                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center space-x-2"
+                                                    >
+                                                        <ShoppingCart className="w-5 h-5" />
+                                                        <span>Add to Cart</span>
+                                                    </Button>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </motion.div>
+
+                                    {/* Pagination */}
+                                    {totalPages > 1 && (
+                                        <motion.div
+                                            initial="hidden"
+                                            whileInView="visible"
+                                            viewport={{ once: true }}
+                                            variants={fadeInUp}
+                                            className="flex justify-center mt-10"
+                                        >
+                                            <div className="flex items-center space-x-2">
+                                                <Button
+                                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={currentPage === 1}
+                                                    variant="outline"
+                                                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                                                </Button>
+                                                
+                                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                                    <Button
+                                                        key={page}
+                                                        onClick={() => setCurrentPage(page)}
+                                                        variant={currentPage === page ? "default" : "ghost"}
+                                                        className={`w-10 h-10 rounded-lg ${currentPage === page ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                                                    >
+                                                        {page}
+                                                    </Button>
+                                                ))}
+                                                
+                                                <Button
+                                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                    disabled={currentPage === totalPages}
+                                                    variant="outline"
+                                                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                                                </Button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </>
+                            ) : (
+                                <motion.div
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={fadeInUp}
+                                    className="text-center py-16"
+                                >
+                                    <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                    <h3 className="text-xl font-semibold text-gray-700 mb-2">No medicines found</h3>
+                                    <p className="text-gray-500">Try adjusting your filters or search terms</p>
+                                    <Button 
+                                        onClick={() => {
+                                            setSelectedCategory('all');
+                                            setSearchQuery('');
+                                            setPriceRange([0, 200]);
+                                        }}
+                                        variant="ghost"
+                                        className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+                                    >
+                                        Reset all filters
+                                    </Button>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </div>
-            )}
-        </section>
+            </section>
+
+            {/* Consultation CTA */}
+            <motion.section
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={fadeInUp}
+                className="py-16 bg-blue-600"
+            >
+                <div className="container mx-auto px-4">
+                    <div className="max-w-4xl mx-auto text-center">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                            Need a Prescription?
+                        </h2>
+                        <div className="w-20 h-1 bg-white mx-auto mb-6" />
+                        <p className="text-lg sm:text-xl text-blue-100 mb-8">
+                            Some of our medications require a prescription. Book a consultation with our dermatologists to get the right treatment for your condition.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Button className="bg-white text-blue-600 hover:bg-blue-50 px-6 sm:px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                                <Phone className="w-5 h-5 mr-2" />
+                                Book Consultation
+                            </Button>
+                            <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 px-6 sm:px-8 py-3 rounded-xl font-semibold transition-all duration-300 w-full sm:w-auto">
+                                <Mail className="w-4 h-4 mr-2" />
+                                Send Message
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </motion.section>
+        </div>
     );
 };
 

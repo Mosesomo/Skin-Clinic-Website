@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Sparkles,
   Menu,
@@ -6,25 +7,25 @@ import {
   ShoppingCart,
   User,
   ChevronDown,
-  Stethoscope
+  Stethoscope,
+  LayoutDashboard
 } from 'lucide-react';
-// Note: Replace with your routing solution (react-router-dom, Next.js router, etc.)
-import { motion, AnimatePresence } from 'framer-motion';
 
 // Header Component
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  // Mock location for demo - replace with your router's useLocation hook
-  const location = { pathname: '/' };
+  const location = useLocation();
+  const isAdmin = true; // Replace with actual auth logic
   
   const navItems = [
-    { id: '', label: 'Home' },
-    { id: 'about', label: 'About' },
-    { id: 'services', label: 'Services' },
-    { id: 'treatments', label: 'Treatments' },
-    { id: 'contact', label: 'Contact' },
+    { id: '', label: 'Home', path: '/' },
+    { id: 'about', label: 'About', path: '/about' },
+    { id: 'services', label: 'Services', path: '/services' },
+    { id: 'shop', label: 'Shop', path: '/shop' },
+    { id: 'contact', label: 'Contact', path: '/contact' },
+    ...(isAdmin ? [{ id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard }] : []),
   ];
 
   // Handle scroll effect
@@ -40,7 +41,7 @@ const Navbar = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMenuOpen && !event.target.closest('header')) {
+      if (isMenuOpen && !event.target.closest('header') && !event.target.closest('.mobile-menu')) {
         setIsMenuOpen(false);
       }
     };
@@ -62,34 +63,43 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
+  const toggleMenu = (e) => {
+    e.stopPropagation();
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Check if a path is active
+  const isActivePath = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <>
-      <motion.header 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
+      <header 
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
           isScrolled 
-            ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200/20' 
-            : 'bg-black/20 backdrop-blur-md'
+            ? 'bg-white shadow-lg border-b border-gray-200' 
+            : 'bg-transparent'
         }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <a href="/" className="flex items-center space-x-3 group">
-              <motion.div 
-                whileHover={{ rotate: 180, scale: 1.1 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className={`w-9 h-9 lg:w-10 lg:h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
+              <div 
+                className={`w-9 h-9 lg:w-10 lg:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:rotate-180 hover:scale-110 ${
                   isScrolled 
                     ? 'bg-blue-600 shadow-md' 
-                    : 'bg-white/20 backdrop-blur-sm border border-white/30'
+                    : 'bg-white/20 border border-white/30'
                 }`}
               >
                 <Stethoscope className={`w-5 h-5 lg:w-6 lg:h-6 transition-colors duration-300 ${
                   isScrolled ? 'text-white' : 'text-white'
                 }`} />
-              </motion.div>
+              </div>
               <span className={`text-xl lg:text-2xl font-bold transition-colors duration-300 ${
                 isScrolled 
                   ? 'text-gray-900 group-hover:text-blue-600' 
@@ -100,224 +110,189 @@ const Navbar = () => {
             </a>
             
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center space-x-8">
               {navItems.map((item) => (
-                <a
-                  href={`/${item.id}`}
+                <Link
                   key={item.id}
-                  className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-105 ${
-                    location.pathname === '/' + item.id 
-                      ? isScrolled 
-                        ? 'text-blue-600' 
-                        : 'text-white'
-                      : isScrolled 
-                        ? 'text-gray-700 hover:text-blue-600' 
-                        : 'text-white/90 hover:text-white'
+                  to={item.path}
+                  className={`flex items-center space-x-1 text-sm font-medium transition-colors duration-300 ${
+                    isScrolled
+                      ? isActivePath(item.path)
+                        ? 'text-blue-600'
+                        : 'text-gray-700 hover:text-blue-600'
+                      : 'text-white hover:text-blue-200'
                   }`}
                 >
-                  {item.label}
-                  {location.pathname === '/' + item.id && (
-                    <motion.div
-                      layoutId="navbar-indicator"
-                      className={`absolute inset-0 rounded-xl -z-10 transition-colors duration-300 ${
-                        isScrolled 
-                          ? 'bg-blue-50 border border-blue-100' 
-                          : 'bg-white/20 backdrop-blur-sm border border-white/30'
-                      }`}
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                </a>
+                  {item.icon && <item.icon className="w-4 h-4 mr-1" />}
+                  <span>{item.label}</span>
+                </Link>
               ))}
             </nav>
             
             {/* Desktop Right Section */}
             <div className="hidden lg:flex items-center space-x-3">
               {/* Cart */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+              <button
+                className={`relative p-2.5 rounded-xl transition-all duration-300 hover:scale-105 ${
                   isScrolled 
                     ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
-                    : 'text-white/90 hover:text-white hover:bg-white/20 backdrop-blur-sm'
+                    : 'text-white/90 hover:text-white hover:bg-white/20'
                 }`}
               >
                 <ShoppingCart className="w-5 h-5" />
                 {cartCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium"
-                  >
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {cartCount}
-                  </motion.span>
+                  </span>
                 )}
-              </motion.button>
+              </button>
 
               {/* Account */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`p-2.5 rounded-xl transition-all duration-300 ${
+              <button
+                className={`p-2.5 rounded-xl transition-all duration-300 hover:scale-105 ${
                   isScrolled 
                     ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
-                    : 'text-white/90 hover:text-white hover:bg-white/20 backdrop-blur-sm'
+                    : 'text-white/90 hover:text-white hover:bg-white/20'
                 }`}
               >
                 <User className="w-5 h-5" />
-              </motion.button>
+              </button>
 
               {/* Book Appointment */}
-              <motion.button
-                whileHover={{ scale: 1.05, y: -1 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl ${
+              <button
+                className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 hover:-translate-y-0.5 ${
                   isScrolled 
                     ? 'bg-blue-600 text-white hover:bg-blue-700' 
                     : 'bg-white text-blue-600 hover:bg-blue-50'
                 }`}
               >
                 Book Appointment
-              </motion.button>
+              </button>
             </div>
             
             {/* Mobile Menu Button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
+            <button
               className={`lg:hidden p-2 rounded-xl transition-all duration-300 ${
                 isScrolled 
                   ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
-                  : 'text-white hover:bg-white/20 backdrop-blur-sm'
+                  : 'text-white hover:bg-white/20'
               }`}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={toggleMenu}
             >
-              <motion.div
-                animate={{ rotate: isMenuOpen ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
+              <div
+                className={`transform transition-transform duration-300 ${
+                  isMenuOpen ? 'rotate-180' : 'rotate-0'
+                }`}
               >
                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </motion.div>
-            </motion.button>
+              </div>
+            </button>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Mobile Menu Backdrop */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-            onClick={() => setIsMenuOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-80 max-w-[85vw] z-50 bg-white/95 backdrop-blur-xl shadow-2xl lg:hidden"
-          >
-            <div className="flex flex-col h-full">
-              {/* Mobile Menu Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <Stethoscope className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">DermaCare</span>
-                </div>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="p-2 text-gray-600 hover:text-gray-900 rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </motion.button>
+      <div
+        className={`mobile-menu fixed top-0 right-0 h-full w-80 max-w-[85vw] z-50 bg-white shadow-2xl lg:hidden transform transition-transform duration-300 ease-in-out ${
+          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Mobile Menu Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <Stethoscope className="w-4 h-4 text-white" />
               </div>
-
-              {/* Mobile Menu Content */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <nav className="space-y-2">
-                  {navItems.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <a
-                        href={`/${item.id}`}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`block w-full px-4 py-3 text-base font-medium rounded-xl transition-all duration-200 ${
-                          location.pathname === '/' + item.id
-                            ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
-                        }`}
-                      >
-                        {item.label}
-                      </a>
-                    </motion.div>
-                  ))}
-                </nav>
-
-                {/* Mobile Actions */}
-                <div className="mt-8 pt-6 border-t border-gray-200/50 space-y-4">
-                  <motion.button
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex items-center justify-between w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-xl transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <ShoppingCart className="w-5 h-5" />
-                      <span>Shopping Cart</span>
-                    </div>
-                    {cartCount > 0 && (
-                      <span className="w-6 h-6 bg-red-500 text-white text-sm rounded-full flex items-center justify-center">
-                        {cartCount}
-                      </span>
-                    )}
-                  </motion.button>
-
-                  <motion.button
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex items-center space-x-3 w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-xl transition-colors"
-                  >
-                    <User className="w-5 h-5" />
-                    <span>My Account</span>
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* Mobile Menu Footer */}
-              <div className="p-6 border-t border-gray-200/50">
-                <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl text-base font-semibold hover:bg-blue-700 transition-colors shadow-lg"
-                >
-                  Book Appointment
-                </motion.button>
-              </div>
+              <span className="text-lg font-bold text-gray-900">DermaCare</span>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              className="p-2 text-gray-600 hover:text-gray-900 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Mobile Menu Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <nav className="space-y-2">
+              {navItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`transform transition-all duration-200 ${
+                    isMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-5 opacity-0'
+                  }`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  <Link
+                    to={item.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`block w-full px-4 py-3 text-base font-medium rounded-xl transition-all duration-200 ${
+                      isActivePath(item.path)
+                        ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </div>
+              ))}
+            </nav>
+
+            {/* Mobile Actions */}
+            <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
+              <button
+                className={`flex items-center justify-between w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-xl transition-all duration-200 ${
+                  isMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-5 opacity-0'
+                }`}
+                style={{ transitionDelay: '500ms' }}
+              >
+                <div className="flex items-center space-x-3">
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Shopping Cart</span>
+                </div>
+                {cartCount > 0 && (
+                  <span className="w-6 h-6 bg-red-500 text-white text-sm rounded-full flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                className={`flex items-center space-x-3 w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-xl transition-all duration-200 ${
+                  isMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-5 opacity-0'
+                }`}
+                style={{ transitionDelay: '600ms' }}
+              >
+                <User className="w-5 h-5" />
+                <span>My Account</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Menu Footer */}
+          <div className="p-6 border-t border-gray-200">
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              className={`w-full bg-blue-600 text-white px-6 py-3 rounded-xl text-base font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:scale-102 ${
+                isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'
+              }`}
+              style={{ transitionDelay: '700ms' }}
+            >
+              Book Appointment
+            </button>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

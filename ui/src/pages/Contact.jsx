@@ -31,15 +31,15 @@ const ContactPage = () => {
         {
             icon: <MapPin className="w-6 h-6" />,
             title: "Visit Our Clinic",
-            value: "Westlands Medical Plaza, Nairobi",
+            value: "Saba Saba -Kin'gorani Road, Ronald Ngala Rd, Mombasa",
             description: "State-of-the-art facilities",
             gradient: "from-emerald-500 to-teal-600"
         },
         {
             icon: <Phone className="w-6 h-6" />,
             title: "Call Us Today",
-            value: "+254 700 123 456",
-            description: "Available 24/7 for emergencies",
+            value: "0720 108898",
+            description: "Available during business hours",
             gradient: "from-blue-500 to-indigo-600"
         },
         {
@@ -52,9 +52,9 @@ const ContactPage = () => {
     ];
 
     const businessHours = [
-        { day: "Monday - Friday", time: "8:00 AM - 6:00 PM" },
-        { day: "Saturday", time: "9:00 AM - 4:00 PM" },
-        { day: "Sunday", time: "Closed" }
+        { day: "Monday - Friday", time: "7:00 AM - 8:00 PM" },
+        { day: "Saturday", time: "Closed" },
+        { day: "Sunday", time: "1:00 PM - 8:00 PM" }
     ];
 
     const features = [

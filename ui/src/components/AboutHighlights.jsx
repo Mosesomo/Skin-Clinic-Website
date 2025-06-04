@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Award, Microscope, Heart, Sparkles } from 'lucide-react';
+import { Stethoscope, Microscope, Users, Heart, Sparkles } from 'lucide-react';
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 
@@ -14,23 +14,23 @@ const AboutHighlights = () => {
     
     const highlights = [
         {
-            icon: <Award className="w-6 h-6" />,
-            title: "Expert Dermatologists",
-            description: "Our board-certified dermatologists have decades of combined experience and are dedicated to providing personalized care for your skin.",
+            icon: <Stethoscope className="w-6 h-6" />,
+            title: "Comprehensive Diagnostics",
+            description: "We provide thorough skin biopsies for histopathology and relevant laboratory tests to support accurate diagnoses of all skin conditions.",
             color: "from-blue-400 to-cyan-500",
             bgPattern: "bg-[radial-gradient(circle_at_20%_50%,rgba(59,130,246,0.15),transparent_50%)]"
         },
         {
             icon: <Microscope className="w-6 h-6" />,
-            title: "Advanced Dermatology",
-            description: "We offer a wide range of dermatological services, including medical dermatology, cosmetic dermatology, and pediatric dermatology.",
+            title: "Advanced Procedures",
+            description: "Our state-of-the-art dermoscopy and cryotherapy services, combined with detailed skin analysis and laser treatments, ensure the best possible care.",
             color: "from-purple-400 to-pink-500",
             bgPattern: "bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,0.15),transparent_50%)]"
         },
         {
-            icon: <Heart className="w-6 h-6" />,
-            title: "Personalized Care",
-            description: "We believe in providing personalized care for each of our patients, tailored to their unique skin needs.",
+            icon: <Users className="w-6 h-6" />,
+            title: "Patient Education & Community Care",
+            description: "We believe in empowering our patients through detailed health education and supporting vulnerable populations with our community outreach programs.",
             color: "from-emerald-400 to-teal-500",
             bgPattern: "bg-[radial-gradient(circle_at_50%_80%,rgba(16,185,129,0.15),transparent_50%)]"
         }
@@ -96,7 +96,7 @@ const AboutHighlights = () => {
                     >
                         Why Choose 
                         <span className="text-primary ml-2">
-                            DermaCare?
+                            Jomo Derma Centre?
                         </span>
                     </motion.h2>
                     
@@ -107,8 +107,9 @@ const AboutHighlights = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.5 }}
                     >
-                        At DermaCare, we are committed to providing the highest quality dermatological care. 
-                        Our team of board-certified dermatologists is dedicated to helping you achieve and maintain healthy, beautiful skin.
+                        We are dedicated to treating skin, hair, and nail conditions with the highest standard of medical excellence. 
+                        Through comprehensive diagnostics, advanced treatments, and detailed patient education, we serve our community 
+                        with special attention to vulnerable populations.
                     </motion.p>
                 </motion.div>
                 
