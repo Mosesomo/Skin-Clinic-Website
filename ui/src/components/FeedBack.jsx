@@ -52,7 +52,7 @@ const FeedBack = () => {
     const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
 
     return (
-        <section ref={ref} className="relative py-6 bg-white overflow-hidden">
+        <section id="reviews" ref={ref} className="relative py-6 bg-white overflow-hidden">
             {/* Parallax Background */}
             <motion.div
                 className="absolute inset-0 pointer-events-none"

@@ -9,6 +9,7 @@ const Booking = lazy(() => import('@/pages/Booking.jsx'));
 const Contact = lazy(() => import('@/pages/Contact.jsx'));
 const About = lazy(() => import('@/pages/About.jsx'));
 const Dashboard = lazy(() => import('@/pages/Dashboard.jsx'));
+const UserDashboard = lazy(() => import('@/pages/UserDashboard.jsx'));
 
 export const routes = [
     { name: "home", path: "/", component: Home, index: true },
@@ -20,4 +21,5 @@ export const routes = [
     { name: "Contact", path: "/contact", component: Contact },
     { name: "About", path: "/about", component: About },
     { name: "Dashboard", path: "/dashboard", component: Dashboard, adminOnly: true },
+    { name: "Account", path: "/account", component: UserDashboard},
 ];

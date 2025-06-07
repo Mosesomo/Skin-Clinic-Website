@@ -1,27 +1,11 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  Search,
-  Plus,
-  Edit,
-  Trash2,
-  Package,
-  Tag,
-  AlertCircle,
-  MoreVertical,
-} from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { Search, Plus, Edit, Trash2, Package, Tag, AlertCircle, MoreVertical } from "lucide-react"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -29,87 +13,107 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import ProductForm from "@/components/dashboard/admin/ProductForm"
 
 // Mock products data
 const mockProducts = [
   {
     id: 1,
-    name: 'Acne Treatment Cream',
-    category: 'Treatments',
-    price: 45.00,
+    name: "Acne Treatment Cream",
+    category: "Treatments",
+    price: 45.0,
     stock: 50,
     requiresPrescription: true,
-    status: 'in-stock',
+    status: "in-stock",
   },
   {
     id: 2,
-    name: 'Facial Cleanser',
-    category: 'Skincare',
-    price: 25.00,
+    name: "Facial Cleanser",
+    category: "Skincare",
+    price: 25.0,
     stock: 75,
     requiresPrescription: false,
-    status: 'in-stock',
+    status: "in-stock",
   },
   {
     id: 3,
-    name: 'Anti-Aging Serum',
-    category: 'Treatments',
+    name: "Anti-Aging Serum",
+    category: "Treatments",
     price: 89.99,
     stock: 5,
     requiresPrescription: false,
-    status: 'low-stock',
+    status: "low-stock",
   },
   {
     id: 4,
-    name: 'Tretinoin Cream',
-    category: 'Medications',
-    price: 65.00,
+    name: "Tretinoin Cream",
+    category: "Medications",
+    price: 65.0,
     stock: 0,
     requiresPrescription: true,
-    status: 'out-of-stock',
+    status: "out-of-stock",
   },
-];
+]
 
 const ProductList = () => {
-  const [products, setProducts] = useState(mockProducts);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, product: null });
+  const [products, setProducts] = useState(mockProducts)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, product: null })
+  const [showProductForm, setShowProductForm] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
+
+  const handleAddProduct = () => {
+    setEditingProduct(null)
+    setShowProductForm(true)
+  }
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product)
+    setShowProductForm(true)
+  }
+
+  const handleFormSubmit = (formData) => {
+    if (editingProduct) {
+      // Update existing product
+      setProducts(products.map((p) => (p.id === editingProduct.id ? { ...p, ...formData, id: editingProduct.id } : p)))
+    } else {
+      // Add new product
+      const newProduct = {
+        ...formData,
+        id: Math.max(...products.map((p) => p.id)) + 1,
+        status: formData.stock > 10 ? "in-stock" : formData.stock > 0 ? "low-stock" : "out-of-stock",
+      }
+      setProducts([...products, newProduct])
+    }
+  }
 
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      product.category.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
   const handleDeleteProduct = () => {
-    setProducts(products.filter((p) => p.id !== deleteDialog.product.id));
-    setDeleteDialog({ open: false, product: null });
-  };
+    setProducts(products.filter((p) => p.id !== deleteDialog.product.id))
+    setDeleteDialog({ open: false, product: null })
+  }
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      'in-stock': { color: 'bg-green-500', label: 'In Stock' },
-      'low-stock': { color: 'bg-yellow-500', label: 'Low Stock' },
-      'out-of-stock': { color: 'bg-red-500', label: 'Out of Stock' },
-    };
+      "in-stock": { color: "bg-green-500", label: "In Stock" },
+      "low-stock": { color: "bg-yellow-500", label: "Low Stock" },
+      "out-of-stock": { color: "bg-red-500", label: "Out of Stock" },
+    }
 
-    const config = statusConfig[status];
+    const config = statusConfig[status]
     return (
-      <Badge
-        variant="outline"
-        className={`${config.color} text-white`}
-      >
+      <Badge variant="outline" className={`${config.color} text-white`}>
         {config.label}
       </Badge>
-    );
-  };
+    )
+  }
 
   // Mobile product card component
   const ProductCard = ({ product }) => (
@@ -129,14 +133,11 @@ const ProductList = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleEditProduct(product)}>
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-red-600"
-              onClick={() => setDeleteDialog({ open: true, product })}
-            >
+            <DropdownMenuItem className="text-red-600" onClick={() => setDeleteDialog({ open: true, product })}>
               <Trash2 className="h-4 w-4 mr-2" />
               Delete
             </DropdownMenuItem>
@@ -146,8 +147,7 @@ const ProductList = () => {
 
       <div className="flex flex-wrap gap-2">
         <Badge variant="outline" className="flex items-center gap-1">
-          <Tag className="h-3 w-3" />
-          ${product.price.toFixed(2)}
+          <Tag className="h-3 w-3" />${product.price.toFixed(2)}
         </Badge>
         {getStatusBadge(product.status)}
         {product.requiresPrescription && (
@@ -158,18 +158,12 @@ const ProductList = () => {
         )}
       </div>
 
-      <div className="text-sm text-muted-foreground">
-        Stock: {product.stock} units
-      </div>
+      <div className="text-sm text-muted-foreground">Stock: {product.stock} units</div>
     </Card>
-  );
+  )
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <Card className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h2 className="text-2xl font-bold">Products</h2>
@@ -183,7 +177,7 @@ const ProductList = () => {
                 className="pl-10 w-full"
               />
             </div>
-            <Button className="flex items-center space-x-2">
+            <Button className="flex items-center space-x-2" onClick={handleAddProduct}>
               <Plus className="h-4 w-4" />
               <span>Add Product</span>
             </Button>
@@ -216,8 +210,7 @@ const ProductList = () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="flex w-fit items-center gap-1">
-                      <Tag className="h-3 w-3" />
-                      ${product.price.toFixed(2)}
+                      <Tag className="h-3 w-3" />${product.price.toFixed(2)}
                     </Badge>
                   </TableCell>
                   <TableCell>{product.stock}</TableCell>
@@ -229,12 +222,14 @@ const ProductList = () => {
                         Required
                       </Badge>
                     ) : (
-                      <Badge variant="secondary" className="w-fit">No</Badge>
+                      <Badge variant="secondary" className="w-fit">
+                        No
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleEditProduct(product)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
@@ -261,10 +256,7 @@ const ProductList = () => {
         </div>
       </Card>
 
-      <Dialog
-        open={deleteDialog.open}
-        onOpenChange={() => setDeleteDialog({ open: false, product: null })}
-      >
+      <Dialog open={deleteDialog.open} onOpenChange={() => setDeleteDialog({ open: false, product: null })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Product</DialogTitle>
@@ -280,18 +272,25 @@ const ProductList = () => {
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteProduct}
-              className="w-full sm:w-auto"
-            >
+            <Button variant="destructive" onClick={handleDeleteProduct} className="w-full sm:w-auto">
               Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </motion.div>
-  );
-};
 
-export default ProductList; 
+      {/* Product Form Overlay */}
+      <ProductForm
+        editProduct={editingProduct}
+        isOpen={showProductForm}
+        onClose={() => {
+          setShowProductForm(false)
+          setEditingProduct(null)
+        }}
+        onSubmit={handleFormSubmit}
+      />
+    </motion.div>
+  )
+}
+
+export default ProductList

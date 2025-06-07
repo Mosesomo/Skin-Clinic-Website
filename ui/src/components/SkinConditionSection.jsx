@@ -159,11 +159,10 @@ const SkinConditionSection = () => {
                                 rotateY: 5,
                                 transition: { duration: 0.3 }
                             }}
-                            className="group perspective-1000"
+                            className="group"
                         >
-                            <div className="relative overflow-hidden rounded-2xl border bg-card/10 backdrop-blur-sm hover:bg-card/20 transition-all duration-500 h-full">
-                                {/* Gradient overlay */}
-                                <div className={`absolute inset-0 `} />
+                            <div className="relative overflow-hidden rounded-2xl border bg-card  hover:bg-card/20 transition-all duration-500 h-full">
+                                
                                 
                                 <div className="aspect-video overflow-hidden relative">
                                     <motion.img
@@ -173,21 +172,9 @@ const SkinConditionSection = () => {
                                         whileHover={{ scale: 1.1 }}
                                         transition={{ duration: 0.6 }}
                                     />
-                                    <div className="absolute inset-0 bg-black/20" />
                                     
-                                    {/* Floating particles */}
-                                    <motion.div
-                                        className="absolute top-4 right-4 w-2 h-2 bg-white rounded-full"
-                                        animate={{
-                                            y: [0, -10, 0],
-                                            opacity: [0.7, 1, 0.7]
-                                        }}
-                                        transition={{
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            delay: index * 0.2
-                                        }}
-                                    />
+                                    
+                                    
                                 </div>
                                 
                                 <div className="p-6 relative z-10">
@@ -202,22 +189,7 @@ const SkinConditionSection = () => {
                                     </p>
                                 </div>
 
-                                {/* Hover effect border */}
-                                <motion.div
-                                    className="absolute inset-0 rounded-2xl"
-                                    initial={{ background: "linear-gradient(45deg, transparent, transparent)" }}
-                                    whileHover={{
-                                        background: [
-                                            "linear-gradient(45deg, transparent, transparent)",
-                                            "linear-gradient(45deg, rgba(59, 130, 246, 0.5), rgba(147, 51, 234, 0.5))",
-                                            "linear-gradient(45deg, transparent, transparent)"
-                                        ]
-                                    }}
-                                    transition={{ duration: 1.5, repeat: Infinity }}
-                                    style={{ padding: "2px" }}
-                                >
-                                    <div className="w-full h-full rounded-2xl bg-card/90" />
-                                </motion.div>
+                                
                             </div>
                         </motion.div>
                     ))}

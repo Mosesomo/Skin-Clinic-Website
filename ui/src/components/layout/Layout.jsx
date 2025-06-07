@@ -8,7 +8,7 @@ import ScrollToTopButton from '@/components/common/ScrollToTopButton'
 /* This is the main layout of all pages */
 const Layout = () => {
     const location = useLocation();
-    const isDashboard = location.pathname === '/dashboard';
+    const isDashboard = location.pathname === '/dashboard' || location.pathname === '/account';
 
     return (
         <div className="min-h-screen flex flex-col">

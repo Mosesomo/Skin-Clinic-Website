@@ -1,5 +1,6 @@
 import React from 'react';
 import { Award, Microscope, Heart, Stethoscope, Users, MapPin, Phone, Mail, Calendar, Home, Shield, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom'
 
 const AboutSection = () => {
     const team = [
@@ -157,7 +158,7 @@ const AboutSection = () => {
                     <div 
                         className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 transition-transform duration-[20s] hover:scale-110"
                         style={{
-                            backgroundImage: `url('https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&q=80&w=1920&h=1080')`
+                            backgroundImage: `url('https://images.unsplash.com/photo-1666214280557-f1b5022eb634?auto=format&fit=crop&q=80&w=1920&h=1080')`
                         }}
                     />
                     
@@ -204,13 +205,17 @@ const AboutSection = () => {
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
-                                    <Phone className="w-4 h-4 mr-2" />
-                                    Book Consultation
-                                </Button>
-                                <Button variant="outline" className="border-white text-primary hover:bg-white hover:text-gray-900 px-6 sm:px-8 py-3 rounded-xl font-semibold transition-all duration-300">
-                                    Learn More
-                                </Button>
+                                <Link to="/contact">
+                                    <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                                        <Phone className="w-4 h-4 mr-2" />
+                                        Book Consultation
+                                    </Button>
+                                </Link>
+                                <Link to="/about">
+                                    <Button variant="outline" className="border-white text-primary hover:bg-white hover:text-gray-900 px-6 sm:px-8 py-3 rounded-xl font-semibold transition-all duration-300">
+                                        Learn More
+                                    </Button>
+                                </Link>
                         </div>
                     </div>
                     

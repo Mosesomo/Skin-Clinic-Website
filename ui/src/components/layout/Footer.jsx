@@ -26,11 +26,12 @@ const Footer = () => {
     }, []);
   
     const quickLinks = [
-      { name: 'About Us', href: '#about' },
-      { name: 'Services', href: '#services' },
+      { name: 'About Us', href: 'about' },
+      { name: 'Services', href: 'services' },
       { name: 'Our Team', href: '#team' },
       { name: 'Patient Reviews', href: '#reviews' },
-      { name: 'Contact', href: '#contact' }
+      { name: 'Chemist', href: 'shop' },
+      { name: 'Contact', href: 'contact' }
     ];
   
     const services = [
@@ -259,21 +260,10 @@ const Footer = () => {
             
             {/* Copyright */}
             <div className="mt-8 pt-8 border-t border-border text-center">
-              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <div className="flex  justify-center items-center space-y-4 md:space-y-0">
                 <p className="text-sm text-muted-foreground">
-                  © 2024 DermaCare Clinic. All rights reserved. | Designed with ❤️ for better skin health
+                  © 2025 DermaCare Clinic. All rights reserved.
                 </p>
-                <div className="flex space-x-6 text-sm">
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
-                    Privacy Policy
-                  </a>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
-                    Terms of Service
-                  </a>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
-                    Cookie Policy
-                  </a>
-                </div>
               </div>
             </div>
             

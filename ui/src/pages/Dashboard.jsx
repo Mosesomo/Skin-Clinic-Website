@@ -16,10 +16,10 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import Analytics from '@/components/dashboard/Analytics';
-import ProductList from '@/components/dashboard/ProductList';
-import OrdersTable from '@/components/dashboard/OrdersTable';
-import UsersTable from '@/components/dashboard/UsersTable';
+import Analytics from '@/components/dashboard/admin/Analytics';
+import ProductList from '@/components/dashboard/admin/ProductList';
+import OrdersTable from '@/components/dashboard/admin/OrdersTable';
+import UsersTable from '@/components/dashboard/admin/UsersTable';
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

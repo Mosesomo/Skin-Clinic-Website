@@ -9,7 +9,7 @@ const ContactSection = () => {
         {
             icon: <Phone className="w-6 h-6" />,
             title: "Call Us",
-            value: "+254 700 123 456",
+            value: "0720 108898",
             description: "Speak directly with our team",
             gradient: "from-emerald-500 to-teal-600",
             delay: 0
@@ -25,7 +25,7 @@ const ContactSection = () => {
         {
             icon: <MapPin className="w-6 h-6" />,
             title: "Visit Us",
-            value: "Westlands, Nairobi",
+            value: "Saba Saba - Kin'gorani Road",
             description: "Professional consultation",
             gradient: "from-purple-500 to-pink-600",
             delay: 0.4
@@ -33,9 +33,9 @@ const ContactSection = () => {
     ];
 
     const businessHours = [
-        { day: "Mon - Fri", time: "8:00 AM - 6:00 PM" },
-        { day: "Saturday", time: "9:00 AM - 4:00 PM" },
-        { day: "Sunday", time: "Closed" }
+        { day: "Mon - Fri", time: "7:00 AM - 8:00 PM" },
+        { day: "Saturday", time: "Closed" },
+        { day: "Sunday", time: "1:00 PM - 8:00 PM" }
     ];
 
     return (
