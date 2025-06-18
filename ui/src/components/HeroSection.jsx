@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, Stethoscope, HeartPulse, Calendar, Award, Microscope } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
   const { scrollYProgress } = useScroll();
@@ -16,9 +17,9 @@ const HeroSection = () => {
       subtitle: "Advanced diagnosis and treatment for all skin conditions",
       description: "Our board-certified dermatologists provide comprehensive care using state-of-the-art medical technology and evidence-based treatments.",
       cta: "Book Consultation",
-      ctaLink: "/book-appointment",
+      ctaLink: "/contact",
       secondaryCta: "Emergency Care",
-      secondaryCtaLink: "/emergency"
+      secondaryCtaLink: "#contact"
     },
     {
       image: "https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&q=80&w=1920&h=1080",
@@ -28,7 +29,7 @@ const HeroSection = () => {
       cta: "Our Services",
       ctaLink: "/services",
       secondaryCta: "Treatment Options",
-      secondaryCtaLink: "/treatments"
+      secondaryCtaLink: "#options"
     },
     {
       image: "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&q=80&w=1920&h=1080",
@@ -36,7 +37,7 @@ const HeroSection = () => {
       subtitle: "Prevention, diagnosis, and specialized treatment",
       description: "From routine skin cancer screenings to complex dermatological conditions, our expert team provides personalized care tailored to your needs.",
       cta: "Schedule Screening",
-      ctaLink: "/screening",
+      ctaLink: "/contact",
       secondaryCta: "Learn More",
       secondaryCtaLink: "/about"
     },
@@ -46,9 +47,9 @@ const HeroSection = () => {
       subtitle: "Individual treatment plans for every patient",
       description: "We believe in personalized medicine, creating customized treatment approaches that address your unique skin concerns and health goals.",
       cta: "Meet Our Team",
-      ctaLink: "/doctors",
+      ctaLink: "#team",
       secondaryCta: "Patient Portal",
-      secondaryCtaLink: "/portal"
+      secondaryCtaLink: "/account"
     }
   ];
 
@@ -166,22 +167,26 @@ const HeroSection = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.6 }}
                   >
-                    <Button
-                      size="lg"
-                      className="group bg-blue-600 hover:bg-blue-700 text-white border-0"
-                    >
-                      <Stethoscope className="mr-2 h-5 w-5" />
-                      {slides[currentSlide].cta}
-                      <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="group border-white/30 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
-                    >
-                      <HeartPulse className="mr-2 h-5 w-5" />
-                      {slides[currentSlide].secondaryCta}
-                    </Button>
+                    <Link to={slides[currentSlide].ctaLink}>
+                      <Button
+                        size="lg"
+                        className="group bg-blue-600 hover:bg-blue-700 text-white border-0"
+                      >
+                        <Stethoscope className="mr-2 h-5 w-5" />
+                        {slides[currentSlide].cta}
+                        <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                      </Button>
+                    </Link>
+                    <Link to={slides[currentSlide].secondaryCtaLink}>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="group border-white/30 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                      >
+                        <HeartPulse className="mr-2 h-5 w-5" />
+                        {slides[currentSlide].secondaryCta}
+                      </Button>
+                    </Link>
                   </motion.div>
 
                   {/* Stats */}

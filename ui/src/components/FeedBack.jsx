@@ -1,13 +1,9 @@
-import { useState } from 'react';
-import { Star, Quote, Sparkles, Heart, ThumbsUp } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
+import { useState, useEffect } from 'react';
+import { Star, Quote, Sparkles, Heart, ThumbsUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const FeedBack = () => {
-    const { ref, inView } = useInView({
-        threshold: 0.1,
-        triggerOnce: true
-    });
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
     const [reviews, setReviews] = useState([
       {
@@ -51,191 +47,262 @@ const FeedBack = () => {
     const totalReviews = reviews.length;
     const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
 
+    // Auto-play functionality
+    useEffect(() => {
+        if (!isAutoPlaying) return;
+        
+        const interval = setInterval(() => {
+            setCurrentSlide((prev) => (prev + 1) % reviews.length);
+        }, 4000);
+
+        return () => clearInterval(interval);
+    }, [isAutoPlaying, reviews.length]);
+
+    const nextSlide = () => {
+        setCurrentSlide((prev) => (prev + 1) % reviews.length);
+        setIsAutoPlaying(false);
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide((prev) => (prev - 1 + reviews.length) % reviews.length);
+        setIsAutoPlaying(false);
+    };
+
+    const goToSlide = (index) => {
+        setCurrentSlide(index);
+        setIsAutoPlaying(false);
+    };
+
     return (
-        <section id="reviews" ref={ref} className="relative py-6 bg-white overflow-hidden">
-            {/* Parallax Background */}
-            <motion.div
-                className="absolute inset-0 pointer-events-none"
-                style={{ y: inView ? 0 : -100, opacity: inView ? 1 : 0 }}
-            >
-                {/* Mesh */}
-                <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-background" />
+        <section id="reviews" className="relative py-8 bg-white overflow-hidden">
+            {/* Animated Background */}
+            <div className="absolute inset-0 pointer-events-none">
+                {/* Mesh gradient */}
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50" />
 
-                {/* Grid */}
+                {/* Animated grid */}
                 <div
-                className="absolute inset-0 opacity-[0.05]"
-                style={{
-                    backgroundImage: `
-                    radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0),
-                    linear-gradient(45deg, transparent 0%, transparent 49%, currentColor 50%, transparent 51%),
-                    linear-gradient(-45deg, transparent 0%, transparent 49%, currentColor 50%, transparent 51%)
-                    `,
-                    backgroundSize: '30px 30px, 60px 60px, 60px 60px',
-                    backgroundPosition: '0 0, 0 0, 0 0'
-                }}
+                    className="absolute inset-0 opacity-[0.03]"
+                    style={{
+                        backgroundImage: `
+                        radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0),
+                        linear-gradient(45deg, transparent 0%, transparent 49%, currentColor 50%, transparent 51%),
+                        linear-gradient(-45deg, transparent 0%, transparent 49%, currentColor 50%, transparent 51%)
+                        `,
+                        backgroundSize: '40px 40px, 80px 80px, 80px 80px',
+                        backgroundPosition: '0 0, 0 0, 0 0'
+                    }}
                 />
 
-                {/* Decoration Elements */}
+                {/* Floating elements */}
                 <div className="absolute inset-0 overflow-hidden">
-                <motion.div
-                    animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 90, 0],
-                    }}
-                    transition={{
-                    duration: 20,
-                    repeat: Infinity,
-                    ease: "linear"
-                    }}
-                    className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full bg-gradient-to-br from-primary/10 to-transparent blur-3xl"
-                />
-                <motion.div
-                    animate={{
-                    scale: [1.2, 1, 1.2],
-                    rotate: [90, 0, 90],
-                    }}
-                    transition={{
-                    duration: 15,
-                    repeat: Infinity,
-                    ease: "linear"
-                    }}
-                    className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 rounded-full bg-gradient-to-tl from-primary/10 to-transparent blur-3xl"
-                />
+                    <div 
+                        className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full bg-gradient-to-br from-blue-400/10 to-transparent blur-3xl animate-pulse"
+                        style={{ 
+                            animation: 'float 20s ease-in-out infinite',
+                            animationDelay: '0s'
+                        }}
+                    />
+                    <div 
+                        className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 rounded-full bg-gradient-to-tl from-purple-400/10 to-transparent blur-3xl animate-pulse"
+                        style={{ 
+                            animation: 'float 15s ease-in-out infinite reverse',
+                            animationDelay: '2s'
+                        }}
+                    />
                 </div>
-            </motion.div>
+            </div>
 
             <div className="container mx-auto px-4 relative z-10">
                 {/* Header Section */}
-                <div className="text-center mb-16">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full mb-4 animate-pulse">
-                        <Heart className="w-6 h-6 text-primary" />
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full mb-6 animate-pulse">
+                        <Heart className="w-8 h-8 text-blue-600" />
                     </div>
                     
-                    <h2 className="text-4xl font-bold text-foreground mb-4">
+                    <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
                         Patient
-                        <span className="text-primary ml-2">
+                        <span className="text-blue-600 ml-3">
                             Reviews
                         </span>
                     </h2>
                     
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
                         Discover what our patients say about their transformative experiences with DermaCare
                     </p>
 
                     {/* Rating Summary */}
-                    <div className="flex items-center justify-center space-x-6 mb-8">
-                        <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-center space-x-8 mb-12">
+                        <div className="flex items-center space-x-3">
                             <div className="flex items-center space-x-1">
                                 {[...Array(5)].map((_, i) => (
                                     <Star 
                                         key={i} 
-                                        className={`w-5 h-5 ${i < Math.floor(averageRating) ? 'text-yellow-400 fill-current' : 'text-muted-foreground/30'}`} 
+                                        className={`w-6 h-6 transition-all duration-300 ${
+                                            i < Math.floor(averageRating) 
+                                                ? 'text-yellow-400 fill-current transform hover:scale-110' 
+                                                : 'text-gray-300'
+                                        }`} 
                                     />
                                 ))}
                             </div>
-                            <span className="text-lg font-semibold text-foreground">{averageRating.toFixed(1)}</span>
+                            <span className="text-2xl font-bold text-gray-900">{averageRating.toFixed(1)}</span>
                         </div>
-                        <div className="h-6 w-px bg-border" />
-                        <div className="text-muted-foreground">
-                            <span className="font-semibold text-foreground">{totalReviews}</span> Reviews
+                        <div className="h-8 w-px bg-gray-300" />
+                        <div className="text-gray-600">
+                            <span className="font-bold text-gray-900 text-xl">{totalReviews}</span> Reviews
                         </div>
                     </div>
                 </div>
                 
-                {/* Reviews Grid */}
-                <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                    {reviews.map((review, index) => (
-                        <div
-                            key={review.id}
-                            className="group relative transform transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2"
-                            style={{
-                                animationDelay: `${index * 200}ms`
-                            }}
+                {/* Slider Container */}
+                <div className="relative max-w-4xl mx-auto">
+                    {/* Main Slider */}
+                    <div className="relative overflow-hidden rounded-3xl">
+                        <div 
+                            className="flex transition-transform duration-700 ease-in-out"
+                            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                         >
-                            <div className="relative h-full p-8 rounded-2xl bg-card/60 backdrop-blur-sm border border-border/50 hover:border-border transition-all duration-300 hover:shadow-2xl">
-                                {/* Background pattern */}
-                                <div className={`absolute inset-0 ${review.bgPattern} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                                
-                                {/* Quote icon */}
-                                <div className="absolute -top-4 -left-4">
-                                    <div className={`w-12 h-12 bg-gradient-to-r ${review.color} rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                                        <Quote className="w-6 h-6 text-white" />
+                            {reviews.map((review, index) => (
+                                <div key={review.id} className="w-full flex-shrink-0 px-4">
+                                    <div className="group relative mx-auto max-w-2xl">
+                                        <div className="relative h-full p-12 rounded-3xl bg-white/80 backdrop-blur-sm border-2 border-gray-100 hover:border-blue-200 transition-all duration-500 hover:shadow-2xl transform hover:scale-[1.02]">
+                                            {/* Background pattern */}
+                                            <div className={`absolute inset-0 ${review.bgPattern} rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+                                            
+                                            {/* Quote icon */}
+                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
+                                                <div className={`w-16 h-16 bg-gradient-to-r ${review.color} rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform duration-500`}>
+                                                    <Quote className="w-8 h-8 text-white" />
+                                                </div>
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="relative z-10 pt-8 text-center">
+                                                {/* Rating */}
+                                                <div className="flex items-center justify-center space-x-1 mb-8">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star 
+                                                            key={i} 
+                                                            className={`w-6 h-6 transition-all duration-500 ${
+                                                                i < review.rating 
+                                                                    ? 'text-yellow-400 fill-current transform group-hover:scale-125' 
+                                                                    : 'text-gray-300'
+                                                            }`}
+                                                            style={{ 
+                                                                animationDelay: `${i * 100}ms`,
+                                                                transitionDelay: `${i * 100}ms`
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+
+                                                {/* Comment */}
+                                                <p className="text-gray-600 text-lg leading-relaxed mb-8 group-hover:text-gray-700 transition-colors duration-300 font-medium">
+                                                    "{review.comment}"
+                                                </p>
+
+                                                {/* Footer */}
+                                                <div className="flex items-center justify-center space-x-6">
+                                                    <div className="text-center">
+                                                        <h4 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 mb-1">
+                                                            {review.name}
+                                                        </h4>
+                                                        <p className={`text-sm bg-gradient-to-r ${review.color} bg-clip-text text-transparent font-semibold`}>
+                                                            {review.service}
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-4 group-hover:translate-x-0">
+                                                        <ThumbsUp className="w-5 h-5 text-blue-600" />
+                                                        <span className="text-sm text-gray-500 font-medium">Verified</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Hover glow effect */}
+                                            <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${review.color} opacity-0 group-hover:opacity-5 transition-opacity duration-700 blur-2xl`} />
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Content */}
-                                <div className="relative z-10 pt-4">
-                                    {/* Rating */}
-                                    <div className="flex items-center space-x-1 mb-4">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star 
-                                                key={i} 
-                                                className={`w-4 h-4 transition-all duration-300 ${
-                                                    i < review.rating 
-                                                        ? 'text-yellow-400 fill-current transform group-hover:scale-110' 
-                                                        : 'text-muted-foreground/30'
-                                                }`}
-                                                style={{ animationDelay: `${i * 100}ms` }}
-                                            />
-                                        ))}
-                                    </div>
-
-                                    {/* Comment */}
-                                    <p className="text-muted-foreground leading-relaxed mb-6 group-hover:text-foreground/80 transition-colors duration-300">
-                                        "{review.comment}"
-                                    </p>
-
-                                    {/* Footer */}
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                                                {review.name}
-                                            </h4>
-                                            <p className={`text-sm bg-gradient-to-r ${review.color} bg-clip-text text-transparent font-medium`}>
-                                                {review.service}
-                                            </p>
-                                        </div>
-                                        
-                                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <ThumbsUp className="w-4 h-4 text-primary" />
-                                            <span className="text-sm text-muted-foreground">Verified</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Hover glow effect */}
-                                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${review.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-xl`} />
-                                
-                                {/* Side accent line */}
-                                <div className={`absolute left-0 top-8 bottom-8 w-1 bg-gradient-to-b ${review.color} rounded-full transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top`} />
-                            </div>
+                            ))}
                         </div>
+                    </div>
+
+                    {/* Navigation Arrows */}
+                    <button
+                        onClick={prevSlide}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group hover:bg-blue-50 border border-gray-200"
+                        style={{ zIndex: 10 }}
+                    >
+                        <ChevronLeft className="w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
+                    </button>
+                    
+                    <button
+                        onClick={nextSlide}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group hover:bg-blue-50 border border-gray-200"
+                        style={{ zIndex: 10 }}
+                    >
+                        <ChevronRight className="w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
+                    </button>
+                </div>
+
+                {/* Slide Indicators */}
+                <div className="flex justify-center mt-12 space-x-3">
+                    {reviews.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => goToSlide(index)}
+                            className={`transition-all duration-300 rounded-full ${
+                                index === currentSlide
+                                    ? 'w-12 h-3 bg-gradient-to-r from-blue-500 to-purple-500'
+                                    : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                            }`}
+                        />
                     ))}
                 </div>
 
+                {/* Auto-play indicator */}
+                <div className="flex justify-center mt-6">
+                    <button
+                        onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-600 hover:text-blue-600 transition-colors duration-300"
+                    >
+                        <div className={`w-2 h-2 rounded-full ${isAutoPlaying ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
+                        <span>{isAutoPlaying ? 'Auto-playing' : 'Paused'}</span>
+                    </button>
+                </div>
+
                 {/* Call to Action */}
-                <div className="text-center mt-16">
-                    <div className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full border border-border/50 hover:border-primary/50 transition-all duration-300 group cursor-pointer">
-                        <Sparkles className="w-5 h-5 text-primary group-hover:animate-spin" />
-                        <span className="text-foreground font-medium">Share Your Experience</span>
-                        <div className="w-2 h-2 bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse" />
+                <div className="text-center mt-8">
+                    <div className="inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 group cursor-pointer hover:shadow-lg">
+                        <Sparkles className="w-6 h-6 text-blue-600 group-hover:animate-spin" />
+                        <span className="text-gray-900 font-semibold text-lg">Share Your Experience</span>
+                        <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
                     </div>
                 </div>
 
                 {/* Bottom decorative elements */}
-                <div className="flex justify-center mt-12 space-x-4">
+                <div className="flex justify-center mt-12 space-x-6">
                     {[0, 1, 2, 3].map((i) => (
                         <div
                             key={i}
-                            className="w-2 h-2 bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse"
+                            className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"
                             style={{
-                                animationDelay: `${i * 300}ms`,
+                                animationDelay: `${i * 500}ms`,
                                 animationDuration: '2s'
                             }}
                         />
                     ))}
                 </div>
             </div>
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) rotate(0deg); }
+                    50% { transform: translateY(-20px) rotate(5deg); }
+                }
+            `}</style>
         </section>
     );
 };

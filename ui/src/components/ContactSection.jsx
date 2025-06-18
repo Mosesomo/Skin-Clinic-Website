@@ -39,7 +39,7 @@ const ContactSection = () => {
     ];
 
     return (
-        <section className="relative py-20  overflow-hidden">
+        <section id="contact" className="relative py-20  overflow-hidden">
             {/* Dynamic background elements */}
             <div className="absolute inset-0">
                 {/* Animated gradient orbs */}

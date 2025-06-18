@@ -83,15 +83,6 @@ const DoctorSection = () => {
                         </motion.div>
                     ))}
                 </div>
-
-                <div className="text-center mt-12">
-                    <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                        <Link to="/team">
-                            View Full Team
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                    </Button>
-                </div>
             </div>
         </section>
     );

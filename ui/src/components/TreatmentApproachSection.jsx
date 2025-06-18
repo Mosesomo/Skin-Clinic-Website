@@ -31,7 +31,7 @@ const TreatmentApproachSection = () => {
     ];
 
     return (
-        <section className="relative py-20 bg-white overflow-hidden">
+        <section id="options" className="relative py-20 bg-white overflow-hidden">
             {/* Dynamic background elements */}
             <div className="absolute inset-0">
                 
